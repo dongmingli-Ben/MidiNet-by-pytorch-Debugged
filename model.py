@@ -4,7 +4,6 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
 import torch.optim as optim
-import ipdb
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -12,7 +11,7 @@ from ops import *
 
 
 class sample_generator(nn.Module):
-    def __init__(self):
+    def __init__(self, pitch_range):
         super(sample_generator, self).__init__()
         self.gf_dim   = 64
         self.y_dim   = 13
@@ -141,8 +140,7 @@ class discriminator(nn.Module):
         self.linear1 = nn.Linear(244,self.dfc_dim)
         self.linear2 = nn.Linear(1037,1)
 
-    def forward(self,x,y,batch_size,pitch_range):        
-
+    def forward(self,x,y,batch_size,pitch_range):
         yb = y.view(batch_size,self.y_dim, 1, 1)
         x = conv_cond_concat(x, yb)  #x.shape torch.Size([72, 14, 16, 128])
         

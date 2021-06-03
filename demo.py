@@ -1,11 +1,7 @@
 import numpy as np
-from pypianoroll import Multitrack, Track 
-import pypianoroll as pypiano
-import torch
+from pypianoroll import Multitrack, Track
 import matplotlib
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import ipdb
 
 
 
@@ -36,9 +32,10 @@ def make_a_track(eight_bar_binarized,track_name ='melody' ,instrument=0):
 def make_a_demo(track1,track2,song_idx):
     sample_name = 'sample_'+str(song_idx)
 
-    multitrack = Multitrack(tracks=[track1,track2], tempo=120.0,beat_resolution=4)
+    multitrack = Multitrack(tracks=[track1.standardize(),track2.standardize()], tempo=np.array([[120.0]]),resolution=4)
     # pypiano.plot(multitrack, filepath='your file situation', mode='separate', preset='default', cmaps=None, xtick='auto', ytick='octave', xticklabel=True, yticklabel='auto', tick_loc=None, tick_direction='in', label='both', grid='both', grid_linestyle=':', grid_linewidth=0.5)
     # plt.savefig('your file situation'+sample_name+'.png')
+    return sample_name, multitrack
 
 
 def chord_list(chord,idx):
@@ -105,31 +102,29 @@ def make_chord_track(chord,instrument,volume=40):
 
 
 def main():
-    data = np.load('output melody file')
-    chord = np.load('output chord file')
-    instrument = input('which instrument you want to play? from 0 to 128,default=0:')
-    volume     = input('how loud you want to play? from 1 to 127,default= 40:')
+    data = np.load('output_songs.npy', allow_pickle=True)
+    chord = np.load('output_chords.npy', allow_pickle=True)
+    instrument = int(input('which instrument you want to play? from 0 to 128,default=0:'))
+    volume     = int(input('how loud you want to play? from 1 to 127,default= 40:'))
 
     for i in range(data.shape[0]):
+        one_song = data[i]
+        song = []
+        for item in one_song:
+            item = item.detach().numpy()
+            item = item.reshape(16,128)
+            song.append(item)
+        eight_bar = reshape_bar(song)
+        eight_bar_binarized = find_pitch(eight_bar,volume)
+        track = make_a_track(eight_bar_binarized,instrument)
+        
+        song_chord = chord_list(chord,i)
+        chord_player = get_chord(song_chord)
+        np.save('file/chord_'+str(i)+'.npy',chord_player)
+        chord_track = make_chord_track(chord_player,instrument,volume)
+        sample_name, multitrack = make_a_demo(track,chord_track,i)
+        multitrack.write('samples/file'+sample_name+'_instru_'+str(instrument)+'_volume_'+str(volume)+'.mid')
         if i % 100 == 0:
-            one_song = data[i]
-            song = []
-            for item in one_song:
-                item = item.detach().numpy()
-                item = item.reshape(16,128)
-                song.append(item)
-
-            eight_bar = reshape_bar(song)
-            eight_bar_binarized = find_pitch(eight_bar,volume)
-            track = make_a_track(eight_bar_binarized,instrument)
-            
-
-            song_chord = chord_list(chord,i)
-            chord_player = get_chord(song_chord)
-            np.save('file/chord_'+str(i)+'.npy',chord_player)
-            chord_track = make_chord_track(chord_player,instrument,volume)
-            make_a_demo(track,chord_track,i)
-            multitrack.write('file'+sample_name+'_instru:_'+instrument+'_volume:'+'.mid')
             print(str(sample_name)+'saved')
 
 

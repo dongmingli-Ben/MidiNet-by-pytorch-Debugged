@@ -1,8 +1,7 @@
-pytorch  v 0.4.1
+pytorch
 pypianoroll
-xml.etree.ElementTree
+xml
 xmldataset
 math
 matplotlib
 numpy
-ipdb
