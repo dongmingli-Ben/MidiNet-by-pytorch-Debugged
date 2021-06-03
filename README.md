@@ -1,5 +1,5 @@
 
-This is a **Debuged** version of [Implementation of MidiNet by pytorch](https://github.com/annahung31/MidiNet-by-pytorch).
+This is a **Debugged** version of [Implementation of MidiNet by pytorch](https://github.com/annahung31/MidiNet-by-pytorch).
 
 MidiNet paper : https://arxiv.org/abs/1703.10847 
 
